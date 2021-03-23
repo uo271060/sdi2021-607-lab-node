@@ -1,19 +1,16 @@
-//Modulos
+// Modulos
 let express = require('express');
 let app = express();
 
-//Variables
-app.set('port',8081)
+// Variables
+app.set('port', 8081)
 
-app.get('/usuarios', function (req, res) {
-    res.send('ver usuarios');
-});
+// Rutas/controladores por lógica
+require("./routes/rusuarios.js")(app);
+require("./routes/rcanciones.js")(app);
 
-app.get('/canciones', function (req, res) {
-    res.send('ver canciones');
-});
-
-//Lanzar el servidor
+// Lanzar el servidor
 app.listen(app.get('port'), function () {
     console.log('Servidor activo');
+    console.log('Ejecutandose en http://localhost:' + app.get('port'));
 });
