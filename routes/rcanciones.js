@@ -9,6 +9,14 @@ module.exports = function (app) {
 
     });
 
+    app.post("/cancion", function (req, res) {
+        let respuesta = " Cancion agregada: " + req.body.nombre;
+        respuesta += "<br>" + " Genero: " + req.body.genero;
+        respuesta += "<br>" + " Precio: " + req.body.precio;
+        res.send(respuesta);
+
+    });
+
     app.get('/canciones/:id', function (req, res) {
         let respuesta = 'id: ' + req.params.id;
         res.send(respuesta);
@@ -24,5 +32,10 @@ module.exports = function (app) {
         let respuesta = parseInt(req.query.num1) + parseInt(req.query.num2);
         res.send(String(respuesta));
     });
+
+    app.get('/promo*', function (req, res) {
+        res.send('Respuesta patrón promo* ');
+    });
+
 
 };
