@@ -18,7 +18,6 @@ module.exports = function (app, swig) {
         respuesta += "<br>" + " Genero: " + req.body.genero;
         respuesta += "<br>" + " Precio: " + req.body.precio;
         res.send(respuesta);
-
     });
 
     app.get('/canciones/agregar', function (req, res) {
