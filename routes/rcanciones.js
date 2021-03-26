@@ -11,7 +11,6 @@ module.exports = function (app, swig) {
             canciones: canciones
         });
         res.send(respuesta);
-
     });
 
     app.post("/cancion", function (req, res) {
