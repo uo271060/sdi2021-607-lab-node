@@ -1,4 +1,4 @@
-module.exports = function (app, swig) {
+module.exports = function (app, swig, mongo) {
 
     app.get("/canciones", function (req, res) {
         let canciones = [
@@ -14,10 +14,27 @@ module.exports = function (app, swig) {
     });
 
     app.post("/cancion", function (req, res) {
-        let respuesta = " Cancion agregada: " + req.body.nombre;
-        respuesta += "<br>" + " Genero: " + req.body.genero;
-        respuesta += "<br>" + " Precio: " + req.body.precio;
-        res.send(respuesta);
+        let cancion = {
+            nombre: req.body.nombre,
+            genero: req.body.genero,
+            precio: req.body.precio
+        }
+        // Conectarse
+        mongo.MongoClient.connect(app.get('db'), function (err, db) {
+            if (err) {
+                res.send("Error de conexión: " + err);
+            } else {
+                let collection = db.collection('canciones');
+                collection.insertOne(cancion, function (err, result) {
+                    if (err) {
+                        res.send("Error al insertar " + err);
+                    } else {
+                        res.send("Agregada id: " + result.ops[0]._id);
+                    }
+                    db.close();
+                });
+            }
+        });
     });
 
     app.get('/canciones/agregar', function (req, res) {

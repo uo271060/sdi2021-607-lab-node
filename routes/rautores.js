@@ -1,4 +1,4 @@
-module.exports = function (app, swig) {
+module.exports = function (app, swig, mongo) {
 
     app.get("/autores/agregar", function (req, res) {
         let roles = [
