@@ -1,4 +1,4 @@
-module.exports = function (app, swig, mongo) {
+module.exports = function (app, swig, gestorBD) {
 
     app.get("/autores/agregar", function (req, res) {
         let roles = [
