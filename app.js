@@ -25,6 +25,23 @@ routerUsuarioSession.use(function (req, res, next) {
 });
 app.use("/canciones/agregar", routerUsuarioSession);
 app.use("/publicaciones", routerUsuarioSession);
+let routerUsuarioAutor = express.Router();
+routerUsuarioAutor.use(function (req, res, next) {
+    console.log("routerUsuarioAutor");
+    let path = require('path');
+    let id = path.basename(req.originalUrl);
+    gestorBD.obtenerCanciones(
+        { _id: mongo.ObjectID(id) }, function (canciones) {
+            console.log(canciones[0]);
+            if (canciones[0].autor == req.session.usuario) {
+                next();
+            } else {
+                res.redirect("/tienda");
+            }
+        });
+});
+app.use("/cancion/modificar", routerUsuarioAutor);
+app.use("/cancion/eliminar", routerUsuarioAutor);
 let routerAudios = express.Router();
 routerAudios.use(function (req, res, next) {
     console.log("routerAudios");
@@ -61,4 +78,5 @@ require("./routes/rcomentarios.js")(app, swig, gestorBD);
 app.listen(app.get('port'), function () {
     console.log('Servidor activo');
     console.log('Ejecutandose en http://localhost:' + app.get('port'));
+    console.log('Recomendado --> http://localhost:' + app.get('port') + '/tienda');
 });
