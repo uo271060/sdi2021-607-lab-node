@@ -13,6 +13,7 @@ app.use(expressSession({
     resave: true,
     saveUninitialized: true
 }));
+
 let routerUsuarioSession = express.Router();
 routerUsuarioSession.use(function (req, res, next) {
     console.log("routerUsuarioSession");
@@ -25,6 +26,9 @@ routerUsuarioSession.use(function (req, res, next) {
 });
 app.use("/canciones/agregar", routerUsuarioSession);
 app.use("/publicaciones", routerUsuarioSession);
+app.use("/cancion/comprar", routerUsuarioSession);
+app.use("/compras", routerUsuarioSession);
+
 let routerUsuarioAutor = express.Router();
 routerUsuarioAutor.use(function (req, res, next) {
     console.log("routerUsuarioAutor");
@@ -42,6 +46,7 @@ routerUsuarioAutor.use(function (req, res, next) {
 });
 app.use("/cancion/modificar", routerUsuarioAutor);
 app.use("/cancion/eliminar", routerUsuarioAutor);
+
 let routerAudios = express.Router();
 routerAudios.use(function (req, res, next) {
     console.log("routerAudios");
@@ -52,16 +57,26 @@ routerAudios.use(function (req, res, next) {
             if (req.session.usuario && canciones[0].autor == req.session.usuario) {
                 next();
             } else {
-                res.redirect("/tienda");
+                let criterio = {
+                    usuario: req.session.usuario,
+                    cancionId: mongo.ObjectID(idCancion)
+                };
+                gestorBD.obtenerCompras(criterio, function (compras) {
+                    if (compras != null && compras.length > 0) {
+                        next();
+                    } else {
+                        res.redirect("/tienda");
+                    }
+                });
             }
         })
 });
 app.use("/audios/", routerAudios);
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static('public'));
 app.use(fileUpload());
-
 
 app.set('clave', 'abcdefg');
 app.set('crypto', crypto);
