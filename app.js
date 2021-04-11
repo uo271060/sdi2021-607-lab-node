@@ -75,8 +75,11 @@ require("./routes/rcanciones.js")(app, swig, gestorBD);
 require("./routes/rautores.js")(app, swig, gestorBD);
 require("./routes/rcomentarios.js")(app, swig, gestorBD);
 
+app.get('/', function (req, res) {
+    res.redirect('/tienda');
+});
+
 app.listen(app.get('port'), function () {
     console.log('Servidor activo');
     console.log('Ejecutandose en http://localhost:' + app.get('port'));
-    console.log('Recomendado --> http://localhost:' + app.get('port') + '/tienda');
 });

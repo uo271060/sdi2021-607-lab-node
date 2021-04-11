@@ -23,21 +23,21 @@ module.exports = function (app, swig, gestorBD) {
         // Conectarse
         gestorBD.insertarCancion(cancion, function (id) {
             if (id == null) {
-                res.send("Error al insertar canción");
+                res.redirect("/canciones/agregar");
             } else {
                 if (req.files.portada != null) {
                     var imagen = req.files.portada;
                     imagen.mv('public/portadas/' + id + '.png', function (err) {
                         if (err) {
-                            res.send("Error al subir la portada");
+                            res.redirect("/canciones/agregar");
                         } else {
                             if (req.files.audio != null) {
                                 let audio = req.files.audio;
                                 audio.mv('public/audios/' + id + '.mp3', function (err) {
                                     if (err) {
-                                        res.send("Error al subir el audio");
+                                        res.redirect("/canciones/agregar");
                                     } else {
-                                        res.send("Agregada id: " + id);
+                                        res.redirect("/publicaciones");
                                     }
                                 });
                             }
@@ -112,13 +112,13 @@ module.exports = function (app, swig, gestorBD) {
         }
         gestorBD.modificarCancion(criterio, cancion, function (result) {
             if (result == null) {
-                res.send("Error al modificar ");
+                res.redirect("/cancion/modificar/" + id);
             } else {
                 paso1ModificarPortada(req.files, id, function (result) {
                     if (result == null) {
-                        res.send("Error en la modificación");
+                        res.redirect("/cancion/modificar/" + id);
                     } else {
-                        res.send("Modificado");
+                        res.redirect("/publicaciones");
                     }
                 });
             }
