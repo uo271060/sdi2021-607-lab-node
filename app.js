@@ -6,6 +6,8 @@ let gestorBD = require("./modules/gestorBD.js");
 let fileUpload = require('express-fileupload');
 let crypto = require('crypto');
 let expressSession = require('express-session');
+let fs = require('fs');
+let https = require('https');
 let app = express();
 
 app.use(expressSession({
@@ -94,7 +96,18 @@ app.get('/', function (req, res) {
     res.redirect('/tienda');
 });
 
-app.listen(app.get('port'), function () {
+app.use(function (err, req, res, next) {
+    console.log("Error ocurrido: " + err);
+    if (!res.headersSent) {
+        res.status(400);
+        res.send("Recurso no disponible");
+    }
+});
+
+https.createServer({
+    key: fs.readFileSync('certificates/alice.key'),
+    cert: fs.readFileSync('certificates/alice.crt')
+}, app).listen(app.get('port'), function () {
     console.log('Servidor activo');
-    console.log('Ejecutandose en http://localhost:' + app.get('port'));
+    console.log('Ejecutandose en https://localhost:' + app.get('port'));
 });
