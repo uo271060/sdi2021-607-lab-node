@@ -75,16 +75,32 @@ module.exports = function (app, swig, gestorBD) {
     });
 
     app.get('/cancion/comprar/:id', function (req, res) {
-        let cancionId = gestorBD.mongo.ObjectID(req.params.id);
-        let compra = {
-            usuario: req.session.usuario,
-            cancionId: cancionId
-        }
-        gestorBD.insertarCompra(compra, function (idCompra) {
-            if (idCompra == null) {
-                res.send(respuesta);
+        let criterio = { "_id": gestorBD.mongo.ObjectID(req.params.id) };
+        gestorBD.obtenerCanciones(criterio, function (canciones) {
+            if (canciones == null) {
+                res.send("No se pudo encontrar la canción a comprar.");
             } else {
-                res.redirect("/compras");
+                if (canciones[0].autor == req.session.usuario)
+                    res.send("No puedes comprar una de tus publicaciones.");
+                else {
+                    gestorBD.obtenerCompras({ cancionId: canciones[0]._id, usuario: req.session.usuario }, function (compras) {
+                        if (compras.length == 1)
+                            res.send("No se puede comprar una canción ya comprada.");
+                        else {
+                            let compra = {
+                                usuario: req.session.usuario,
+                                cancionId: gestorBD.mongo.ObjectID(req.params.id)
+                            }
+                            gestorBD.insertarCompra(compra, function (idCompra) {
+                                if (idCompra == null) {
+                                    res.send("No se pudo completar el proceso de compra.");
+                                } else {
+                                    res.redirect("/compras");
+                                }
+                            });
+                        }
+                    });
+                }
             }
         });
     });
@@ -119,18 +135,37 @@ module.exports = function (app, swig, gestorBD) {
         let criterio = { "_id": gestorBD.mongo.ObjectID(req.params.id) };
         gestorBD.obtenerCanciones(criterio, function (canciones) {
             if (canciones == null) {
-                res.send("Error al comentar.");
+                res.send("Error al listar comentarios.");
             } else {
                 gestorBD.obtenerComentarios({ "cancion_id": gestorBD.mongo.ObjectID(req.params.id) }, function (comentarios) {
                     if (comentarios == null) {
-                        res.send("Error al listar ");
+                        res.send("Error al listar.");
                     } else {
-                        let respuesta = swig.renderFile('views/bcancion.html',
-                            {
-                                cancion: canciones[0],
-                                comentarios: comentarios
-                            });
-                        res.send(respuesta);
+                        if (canciones[0].autor == req.session.usuario) {
+                            let respuesta = swig.renderFile('views/bcancion.html',
+                                {
+                                    cancion: canciones[0],
+                                    comentarios: comentarios,
+                                    comprada: true
+                                });
+                            res.send(respuesta);
+                        } else {
+                            gestorBD.obtenerCompras(
+                                {
+                                    cancionId: canciones[0]._id,
+                                    usuario: req.session.usuario
+                                }
+                                , function (compras) {
+                                    let comprada = compras.length == 1;
+                                    let respuesta = swig.renderFile('views/bcancion.html',
+                                        {
+                                            cancion: canciones[0],
+                                            comentarios: comentarios,
+                                            comprada: comprada
+                                        });
+                                    res.send(respuesta);
+                                });
+                        }
                     }
                 });
             }
