@@ -1,5 +1,12 @@
 module.exports = function (app, swig, gestorBD) {
 
+    app.get('/error', function (req, res) {
+        let respuesta = swig.renderFile('views/error.html',
+            {
+            });
+        res.send(respuesta);
+    });
+
     app.get("/canciones", function (req, res) {
         let canciones = [
             { "nombre": "Blank space", "precio": "1.2" },
@@ -78,14 +85,14 @@ module.exports = function (app, swig, gestorBD) {
         let criterio = { "_id": gestorBD.mongo.ObjectID(req.params.id) };
         gestorBD.obtenerCanciones(criterio, function (canciones) {
             if (canciones == null) {
-                res.send("No se pudo encontrar la canción a comprar.");
+                res.redirect("/error?mensaje=No se pudo encontrar la canción a comprar&tipoMensaje=alert-danger");
             } else {
                 if (canciones[0].autor == req.session.usuario)
-                    res.send("No puedes comprar una de tus publicaciones.");
+                    res.redirect("/error?mensaje=No puedes comprar una de tus publicaciones&tipoMensaje=alert-danger");
                 else {
                     gestorBD.obtenerCompras({ cancionId: canciones[0]._id, usuario: req.session.usuario }, function (compras) {
                         if (compras.length == 1)
-                            res.send("No se puede comprar una canción ya comprada.");
+                            res.redirect("/error?mensaje=No se puede comprar una canción ya comprada&tipoMensaje=alert-danger");
                         else {
                             let compra = {
                                 usuario: req.session.usuario,
@@ -93,7 +100,7 @@ module.exports = function (app, swig, gestorBD) {
                             }
                             gestorBD.insertarCompra(compra, function (idCompra) {
                                 if (idCompra == null) {
-                                    res.send("No se pudo completar el proceso de compra.");
+                                    res.redirect("/error?mensaje=No se pudo completar el proceso de compra por un error inesperado&tipoMensaje=alert-danger");
                                 } else {
                                     res.redirect("/compras");
                                 }
