@@ -164,13 +164,27 @@ module.exports = function (app, swig, gestorBD) {
                                 }
                                 , function (compras) {
                                     let comprada = compras.length == 1;
-                                    let respuesta = swig.renderFile('views/bcancion.html',
-                                        {
-                                            cancion: canciones[0],
-                                            comentarios: comentarios,
-                                            comprada: comprada
-                                        });
-                                    res.send(respuesta);
+                                    let configuracion = {
+                                        url: "https://www.freeforexapi.com/api/live?pairs=EURUSD",
+                                        method: "get",
+                                        headers: {
+                                            "token": "ejemplo",
+                                        }
+                                    }
+                                    let rest = app.get("rest");
+                                    rest(configuracion, function (error, response, body) {
+                                        console.log("cod: " + response.statusCode + " Cuerpo :" + body);
+                                        let objetoRespuesta = JSON.parse(body);
+                                        let cambioUSD = objetoRespuesta.rates.EURUSD.rate;
+                                        canciones[0].usd = cambioUSD * canciones[0].precio;
+                                        let respuesta = swig.renderFile('views/bcancion.html',
+                                            {
+                                                cancion: canciones[0],
+                                                comentarios: comentarios,
+                                                comprada: comprada
+                                            });
+                                        res.send(respuesta);
+                                    })
                                 });
                         }
                     }

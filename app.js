@@ -9,6 +9,7 @@ let expressSession = require('express-session');
 let fs = require('fs');
 let https = require('https');
 let jwt = require('jsonwebtoken');
+let rest = require('request');
 let app = express();
 
 app.use(function (req, res, next) {
@@ -120,6 +121,7 @@ app.set('crypto', crypto);
 app.set('port', 8081);
 app.set('db', 'mongodb://admin:sdi@tiendamusica-shard-00-00.sixp2.mongodb.net:27017,tiendamusica-shard-00-01.sixp2.mongodb.net:27017,tiendamusica-shard-00-02.sixp2.mongodb.net:27017/myFirstDatabase?ssl=true&replicaSet=atlas-wt3ec4-shard-0&authSource=admin&retryWrites=true&w=majority');
 app.set('jwt', jwt);
+app.set('rest', rest);
 
 gestorBD.init(app, mongo);
 
