@@ -8,6 +8,7 @@ let crypto = require('crypto');
 let expressSession = require('express-session');
 let fs = require('fs');
 let https = require('https');
+let jwt = require('jsonwebtoken');
 let app = express();
 
 app.use(expressSession({
@@ -16,6 +17,32 @@ app.use(expressSession({
     saveUninitialized: true
 }));
 
+let routerUsuarioToken = express.Router();
+routerUsuarioToken.use(function (req, res, next) {
+    let token = req.headers['token'] || req.body.token || req.query.token;
+    if (token != null) {
+        jwt.verify(token, 'secreto', function (err, infoToken) {
+            if (err || (Date.now() / 1000 - infoToken.tiempo) > 240) {
+                res.status(403);
+                res.json({
+                    acceso: false,
+                    error: 'Token invalido o caducado'
+                });
+                return;
+            } else {
+                res.usuario = infoToken.usuario;
+                next();
+            }
+        });
+    } else {
+        res.status(403);
+        res.json({
+            acceso: false,
+            mensaje: 'No hay Token'
+        });
+    }
+});
+app.use('/api/cancion', routerUsuarioToken);
 let routerUsuarioSession = express.Router();
 routerUsuarioSession.use(function (req, res, next) {
     console.log("routerUsuarioSession");
@@ -84,6 +111,7 @@ app.set('clave', 'abcdefg');
 app.set('crypto', crypto);
 app.set('port', 8081);
 app.set('db', 'mongodb://admin:sdi@tiendamusica-shard-00-00.sixp2.mongodb.net:27017,tiendamusica-shard-00-01.sixp2.mongodb.net:27017,tiendamusica-shard-00-02.sixp2.mongodb.net:27017/myFirstDatabase?ssl=true&replicaSet=atlas-wt3ec4-shard-0&authSource=admin&retryWrites=true&w=majority');
+app.set('jwt', jwt);
 
 gestorBD.init(app, mongo);
 
